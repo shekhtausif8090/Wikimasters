@@ -7,6 +7,7 @@ export const articles = pgTable("articles", {
   content: text("content").notNull(),
   imageUrl: text("image_url"),
   published: boolean("published").default(false).notNull(),
+  summary: text("summary"),
   authorId: text("author_id")
     .notNull()
     .references(() => usersSync.id),
@@ -22,7 +23,7 @@ export type NewArticle = typeof articles.$inferInsert;
 
 // add this
 export const usersSync = pgTable("usersSync", {
-  id: text("id").primaryKey(), // Stack Auth user ID
+  id: text("id").primaryKey(),
   name: text("name"),
   email: text("email"),
 });

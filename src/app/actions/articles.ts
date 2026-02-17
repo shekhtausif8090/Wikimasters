@@ -2,13 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import summarizeArticle from "@/ai/summarize";
+import redis from "@/cache";
+import { authorizeUserToEditArticle } from "@/db/authz";
 import db from "@/db/index";
 import { articles } from "@/db/schema";
+import { ensureUserExists } from "@/db/sync-user";
 import { stackServerApp } from "@/stack/server";
-import redis from "@/cache";
-
-// Server actions for articles (stubs)
-// TODO: Replace with real database operations when ready
 
 export type CreateArticleInput = {
   title: string;
@@ -29,7 +29,11 @@ export async function createArticle(data: CreateArticleInput) {
     throw new Error("❌ Unauthorized");
   }
 
+  await ensureUserExists(user);
+
   console.log("✨ createArticle called:", data);
+
+  const summary = await summarizeArticle(data.title || "", data.content || "");
 
   const response = await db
     .insert(articles)
@@ -40,11 +44,11 @@ export async function createArticle(data: CreateArticleInput) {
       published: true,
       authorId: user.id,
       imageUrl: data.imageUrl ?? undefined,
+      summary,
     })
     .returning({ id: articles.id });
 
   redis.del("articles:all");
-
   const articleId = response[0]?.id;
   return { success: true, message: "Article create logged", id: articleId };
 }
@@ -55,7 +59,13 @@ export async function updateArticle(id: string, data: UpdateArticleInput) {
     throw new Error("❌ Unauthorized");
   }
 
+  // if (!(await authorizeUserToEditArticle(user.id, +id))) {
+  //   throw new Error("❌ Forbidden");
+  // }
+
   console.log("📝 updateArticle called:", { id, ...data });
+
+  const summary = await summarizeArticle(data.title || "", data.content || "");
 
   const _response = await db
     .update(articles)
@@ -63,6 +73,7 @@ export async function updateArticle(id: string, data: UpdateArticleInput) {
       title: data.title,
       content: data.content,
       imageUrl: data.imageUrl ?? undefined,
+      summary: summary ?? undefined,
     })
     .where(eq(articles.id, +id));
 
@@ -73,6 +84,10 @@ export async function deleteArticle(id: string) {
   const user = await stackServerApp.getUser();
   if (!user) {
     throw new Error("❌ Unauthorized");
+  }
+
+  if (!(await authorizeUserToEditArticle(user.id, +id))) {
+    throw new Error("❌ Forbidden");
   }
 
   console.log("🗑️ deleteArticle called:", id);
