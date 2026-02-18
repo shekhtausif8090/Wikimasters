@@ -59,9 +59,9 @@ export async function updateArticle(id: string, data: UpdateArticleInput) {
     throw new Error("❌ Unauthorized");
   }
 
-  // if (!(await authorizeUserToEditArticle(user.id, +id))) {
-  //   throw new Error("❌ Forbidden");
-  // }
+  if (!(await authorizeUserToEditArticle(user.id, +id))) {
+    throw new Error("❌ Forbidden");
+  }
 
   console.log("📝 updateArticle called:", { id, ...data });
 

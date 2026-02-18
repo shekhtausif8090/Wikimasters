@@ -247,7 +247,7 @@ export default function WikiArticleViewer({
           <Button variant="outline">← Back to Articles</Button>
         </Link>
 
-        {canEdit && (
+        {/* {canEdit && (
           <div className="flex items-center gap-2">
             <Link href={`/wiki/edit/${article.id}`} className="cursor-pointer">
               <Button className="cursor-pointer">
@@ -268,7 +268,7 @@ export default function WikiArticleViewer({
               </Button>
             </form>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

@@ -20,12 +20,6 @@ export default async function EditArticlePage({
   //   stackServerApp.redirectToHome();
   // }
 
-  // In a real app, you would fetch the article data here
-  // For now, we'll just show some mock data if it's not "new"
-  if (id === "new") {
-    return <WikiEditor isEditing={true} articleId={id} />;
-  }
-
   const article = await getArticleById(+id);
   if (!article) {
     notFound();

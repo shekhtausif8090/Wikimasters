@@ -1,7 +1,8 @@
 "use client";
 
 import MDEditor from "@uiw/react-md-editor";
-import { Upload, X } from "lucide-react";
+import { FileText, Image as ImageIcon, Upload, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
 import { createArticle, updateArticle } from "@/app/actions/articles";
@@ -29,6 +30,7 @@ export default function WikiEditor({
   isEditing = false,
   articleId,
 }: WikiEditorProps) {
+  const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
   const [files, setFiles] = useState<File[]>([]);
@@ -95,11 +97,12 @@ export default function WikiEditor({
 
       if (isEditing && articleId) {
         await updateArticle(articleId, payload);
-        alert("Article updated (stub)");
       } else {
         await createArticle(payload);
-        alert("Article created (stub)");
       }
+
+      // Redirect to home page after successful save
+      router.push("/");
     } catch (err) {
       console.error("Error submitting article:", err);
       alert("Failed to submit article");
@@ -110,180 +113,221 @@ export default function WikiEditor({
 
   // Handle cancel
   const handleCancel = () => {
-    // In a real app, you would navigate back
     const shouldLeave = window.confirm(
       "Are you sure you want to cancel? Any unsaved changes will be lost.",
     );
     if (shouldLeave) {
-      console.log("User cancelled editing");
-      // navigation logic would go here
+      router.push("/");
     }
   };
 
   const pageTitle = isEditing ? "Edit Article" : "Create New Article";
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">{pageTitle}</h1>
-        {isEditing && articleId && (
-          <p className="text-muted-foreground mt-2">
-            Editing article ID: {articleId}
-          </p>
-        )}
-      </div>
+    <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            {pageTitle}
+          </h1>
+          {isEditing && articleId && (
+            <p className="text-muted-foreground mt-3 text-sm">
+              Editing article ID:{" "}
+              <span className="font-mono font-medium">{articleId}</span>
+            </p>
+          )}
+        </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Article Title</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                type="text"
-                placeholder="Enter article title..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className={errors.title ? "border-destructive" : ""}
-              />
-              {errors.title && (
-                <p className="text-sm text-destructive">{errors.title}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Content Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Article Content</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="content">Content (Markdown) *</Label>
-              <div
-                className={`border rounded-md ${
-                  errors.content ? "border-destructive" : ""
-                }`}
-              >
-                <MDEditor
-                  value={content}
-                  onChange={(val) => setContent(val || "")}
-                  preview="edit"
-                  hideToolbar={false}
-                  visibleDragbar={false}
-                  textareaProps={{
-                    placeholder: "Write your article content in Markdown...",
-                    style: { fontSize: 14, lineHeight: 1.5 },
-                    // make these explicit so SSR and client output match exactly
-                    autoCapitalize: "off",
-                    autoComplete: "off",
-                    autoCorrect: "off",
-                    spellCheck: false,
-                  }}
-                />
-              </div>
-              {errors.content && (
-                <p className="text-sm text-destructive">{errors.content}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* File Upload Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Attachments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                <Upload className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="file-upload"
-                    className="cursor-pointer text-sm font-medium"
-                  >
-                    Click to upload files
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Upload images, documents, or other files to attach to your
-                    article
-                  </p>
-                </div>
+        <form onSubmit={handleSubmit} className="space-y-8 pb-32">
+          {/* Title Section */}
+          <Card className="border-2 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg">Article Title</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <Label htmlFor="title" className="text-sm font-medium">
+                  Title <span className="text-destructive">*</span>
+                </Label>
                 <Input
-                  id="file-upload"
-                  type="file"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="sr-only"
+                  id="title"
+                  type="text"
+                  placeholder="Enter a descriptive title for your article..."
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className={`text-lg h-12 ${errors.title ? "border-destructive focus-visible:ring-destructive" : ""}`}
                 />
+                {errors.title && (
+                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                    <span className="inline-block w-1 h-1 rounded-full bg-destructive"></span>
+                    {errors.title}
+                  </p>
+                )}
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Display uploaded files */}
-              {files.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Uploaded Files:</Label>
+          {/* Content Section */}
+          <Card className="border-2 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg">Article Content</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <Label htmlFor="content" className="text-sm font-medium">
+                  Content (Markdown) <span className="text-destructive">*</span>
+                </Label>
+                <div
+                  className={`border-2 rounded-lg overflow-hidden ${
+                    errors.content ? "border-destructive" : "border-border"
+                  }`}
+                >
+                  <MDEditor
+                    value={content}
+                    onChange={(val) => setContent(val || "")}
+                    preview="edit"
+                    hideToolbar={false}
+                    visibleDragbar={false}
+                    height={500}
+                    textareaProps={{
+                      placeholder: "Write your article content in Markdown...",
+                      style: { fontSize: 16, lineHeight: 1.5 },
+                      // make these explicit so SSR and client output match exactly
+                      autoCapitalize: "off",
+                      autoComplete: "off",
+                      autoCorrect: "off",
+                      spellCheck: false,
+                    }}
+                  />
+                </div>
+                {errors.content && (
+                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                    <span className="inline-block w-1 h-1 rounded-full bg-destructive"></span>
+                    {errors.content}
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* File Upload Section */}
+          <Card className="border-2 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg">Attachments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-5">
+                <div className="relative border-2 border-dashed border-muted-foreground/30 hover:border-muted-foreground/50 rounded-xl p-10 text-center bg-muted/20 hover:bg-muted/30 cursor-pointer group">
+                  <Input
+                    id="file-upload"
+                    type="file"
+                    multiple
+                    onChange={handleFileUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  <Upload className="mx-auto h-14 w-14 text-muted-foreground/40 group-hover:text-muted-foreground/60 mb-4" />
                   <div className="space-y-2">
-                    {files.map((file, index) => (
-                      <div
-                        // biome-ignore lint/suspicious/noArrayIndexKey: the order won't change
-                        key={index}
-                        className="flex items-center justify-between p-2 bg-muted rounded-md"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm font-medium">
-                            {file.name}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            ({(file.size / 1024).toFixed(1)} KB)
-                          </span>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(index)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                    <Label
+                      htmlFor="file-upload"
+                      className="cursor-pointer text-base font-semibold text-foreground/90"
+                    >
+                      Click to upload files
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Upload images, documents, or other files to attach to your
+                      article
+                    </p>
+                    <p className="text-xs text-muted-foreground/70">
+                      Supports multiple files
+                    </p>
                   </div>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Action Buttons */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="min-w-[100px]"
-              >
-                {isSubmitting ? "Saving..." : "Save Article"}
-              </Button>
+                {/* Display uploaded files */}
+                {files.length > 0 && (
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-foreground/90">
+                      Uploaded Files ({files.length})
+                    </Label>
+                    <div className="space-y-2">
+                      {files.map((file, index) => {
+                        const isImage = file.type.startsWith("image/");
+                        return (
+                          <div
+                            // biome-ignore lint/suspicious/noArrayIndexKey: the order won't change
+                            key={index}
+                            className="flex items-center justify-between p-3 bg-muted/50 hover:bg-muted border border-border rounded-lg group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="shrink-0 w-10 h-10 rounded-md bg-background border border-border flex items-center justify-center">
+                                {isImage ? (
+                                  <ImageIcon className="h-5 w-5 text-primary" />
+                                ) : (
+                                  <FileText className="h-5 w-5 text-muted-foreground" />
+                                )}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-foreground">
+                                  {file.name}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {(file.size / 1024).toFixed(1)} KB
+                                </span>
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeFile(index)}
+                              className="h-9 w-9 p-0 hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+
+        {/* Sticky Action Buttons */}
+        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border shadow-2xl z-50">
+          <div className="container mx-auto px-4 py-4 max-w-5xl">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground hidden sm:block">
+                {isEditing
+                  ? "Make your changes and save"
+                  : "Fill in the details to create your article"}
+              </p>
+              <div className="flex gap-3 ml-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={isSubmitting}
+                  className="min-w-[100px]"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  onClick={handleSubmit}
+                  className="min-w-[120px] shadow-lg"
+                >
+                  {isSubmitting ? "Saving..." : "Save Article"}
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
