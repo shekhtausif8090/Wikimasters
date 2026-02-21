@@ -1,7 +1,11 @@
+import { redirect } from "next/navigation";
 import WikiEditor from "@/components/wiki-editor";
-import { stackServerApp } from "@/stack/server";
+import { getUser } from "@/lib/auth-server";
 
 export default async function NewArticlePage() {
-  await stackServerApp.getUser({ or: "redirect" });
+  const user = await getUser();
+  if (!user) {
+    redirect("/auth/sign-in");
+  }
   return <WikiEditor isEditing={false} />;
 }

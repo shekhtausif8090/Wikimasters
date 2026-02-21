@@ -1,29 +1,20 @@
-import db from "@/db/index";
-import { usersSync } from "@/db/schema";
+/**
+ * With Better Auth, users are stored directly in our database.
+ * This file is kept for backward compatibility but is no longer needed.
+ * The `user` table from auth-schema.ts is used instead of usersSync.
+ */
 
-type StackUser = {
+type BetterAuthUser = {
   id: string;
-  displayName: string | null;
-  primaryEmail: string | null;
+  name: string;
+  email: string;
 };
 
 /**
- * Ensures the Stack Auth user exists in our local users table.
- * Call this before creating articles to ensure the foreign key reference works.
+ * No-op function - Better Auth automatically manages users in the database.
+ * Kept for backward compatibility with existing code.
  */
-export async function ensureUserExists(stackUser: StackUser): Promise<void> {
-  await db
-    .insert(usersSync)
-    .values({
-      id: stackUser.id,
-      name: stackUser.displayName,
-      email: stackUser.primaryEmail,
-    })
-    .onConflictDoUpdate({
-      target: usersSync.id,
-      set: {
-        name: stackUser.displayName,
-        email: stackUser.primaryEmail,
-      },
-    });
+export async function ensureUserExists(_user: BetterAuthUser): Promise<void> {
+  // No-op: Better Auth handles user storage automatically
+  return;
 }

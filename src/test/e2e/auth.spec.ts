@@ -24,7 +24,7 @@ test.describe("Authentication Flow (Unauthenticated)", () => {
     await expect(newArticleButton).not.toBeVisible();
   });
 
-  test("should navigate to Stack auth when clicking sign in", async ({
+  test("should navigate to auth page when clicking sign in", async ({
     page,
   }) => {
     await page.goto("/");
@@ -33,11 +33,11 @@ test.describe("Authentication Flow (Unauthenticated)", () => {
     const signInButton = page.locator("text=Sign In");
     await signInButton.click();
 
-    // Should redirect to Stack auth page (handler route)
-    await expect(page).toHaveURL(/.*handler.*sign-in.*/);
+    // Should redirect to auth sign-in page
+    await expect(page).toHaveURL(/.*auth.*sign-in.*/);
   });
 
-  test("should navigate to Stack auth when clicking sign up", async ({
+  test("should navigate to auth page when clicking sign up", async ({
     page,
   }) => {
     await page.goto("/");
@@ -46,30 +46,30 @@ test.describe("Authentication Flow (Unauthenticated)", () => {
     const signUpButton = page.locator("text=Sign Up");
     await signUpButton.click();
 
-    // Should redirect to Stack auth page (handler route)
-    await expect(page).toHaveURL(/.*handler.*sign-up.*/);
+    // Should redirect to auth sign-up page
+    await expect(page).toHaveURL(/.*auth.*sign-up.*/);
   });
 
   test("should protect article creation route", async ({ page }) => {
     // Try to access edit page without authentication
     await page.goto("/wiki/edit/new");
 
-    // Should redirect to auth handler
-    await page.waitForURL(/.*handler.*/, { timeout: 5000 });
+    // Should redirect to auth page
+    await page.waitForURL(/.*auth.*/, { timeout: 5000 });
 
     const url = page.url();
-    expect(url).toMatch(/handler/);
+    expect(url).toMatch(/auth/);
   });
 
   test("should protect article edit routes", async ({ page }) => {
     // Try to access an edit page without authentication
     await page.goto("/wiki/edit/1");
 
-    // Should redirect to auth handler
-    await page.waitForURL(/.*handler.*/, { timeout: 5000 });
+    // Should redirect to auth page
+    await page.waitForURL(/.*auth.*/, { timeout: 5000 });
 
     const url = page.url();
-    expect(url).toMatch(/handler/);
+    expect(url).toMatch(/auth/);
   });
 
   test("should allow viewing articles without authentication", async ({

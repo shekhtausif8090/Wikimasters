@@ -1,4 +1,5 @@
 import { boolean, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { user } from "./auth-schema";
 
 export const articles = pgTable("articles", {
   id: serial("id").primaryKey(),
@@ -10,7 +11,7 @@ export const articles = pgTable("articles", {
   summary: text("summary"),
   authorId: text("author_id")
     .notNull()
-    .references(() => usersSync.id),
+    .references(() => user.id),
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow().notNull(),
 });
@@ -21,10 +22,6 @@ export default schema;
 export type Article = typeof articles.$inferSelect;
 export type NewArticle = typeof articles.$inferInsert;
 
-// add this
-export const usersSync = pgTable("usersSync", {
-  id: text("id").primaryKey(),
-  name: text("name"),
-  email: text("email"),
-});
-export type User = typeof usersSync.$inferSelect;
+// Re-export user from auth-schema for compatibility
+export { user };
+export type User = typeof user.$inferSelect;

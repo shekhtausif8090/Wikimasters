@@ -1,7 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import WikiEditor from "@/components/wiki-editor";
 import { getArticleById } from "@/lib/data/articles";
-import { stackServerApp } from "@/stack/server";
+import { getUser } from "@/lib/auth-server";
 
 interface EditArticlePageProps {
   params: Promise<{
@@ -13,7 +13,10 @@ export default async function EditArticlePage({
   params,
 }: EditArticlePageProps) {
   const { id } = await params;
-  const _user = await stackServerApp.getUser({ or: "redirect" });
+  const _user = await getUser();
+  if (!_user) {
+    redirect("/auth/sign-in");
+  }
 
   // we'll uncomment this later when the articles have real IDs
   // if (user.id !== id) {

@@ -7,8 +7,7 @@ import redis from "@/cache";
 import { authorizeUserToEditArticle } from "@/db/authz";
 import db from "@/db/index";
 import { articles } from "@/db/schema";
-import { ensureUserExists } from "@/db/sync-user";
-import { stackServerApp } from "@/stack/server";
+import { getUser } from "@/lib/auth-server";
 
 export type CreateArticleInput = {
   title: string;
@@ -24,12 +23,10 @@ export type UpdateArticleInput = {
 };
 
 export async function createArticle(data: CreateArticleInput) {
-  const user = await stackServerApp.getUser();
+  const user = await getUser();
   if (!user) {
     throw new Error("❌ Unauthorized");
   }
-
-  await ensureUserExists(user);
 
   console.log("✨ createArticle called:", data);
 
@@ -54,7 +51,7 @@ export async function createArticle(data: CreateArticleInput) {
 }
 
 export async function updateArticle(id: string, data: UpdateArticleInput) {
-  const user = await stackServerApp.getUser();
+  const user = await getUser();
   if (!user) {
     throw new Error("❌ Unauthorized");
   }
@@ -81,7 +78,7 @@ export async function updateArticle(id: string, data: UpdateArticleInput) {
 }
 
 export async function deleteArticle(id: string) {
-  const user = await stackServerApp.getUser();
+  const user = await getUser();
   if (!user) {
     throw new Error("❌ Unauthorized");
   }

@@ -1,6 +1,6 @@
 import { seed } from "drizzle-seed";
 import db, { sql } from "@/db/index";
-import { articles, usersSync } from "@/db/schema";
+import { articles, user } from "@/db/schema";
 
 const SEED_COUNT = 25;
 const SEED = 1337;
@@ -16,21 +16,24 @@ async function main() {
 
     console.log("🔎 Querying existing users...");
     let users = await db
-      .select({ id: usersSync.id })
-      .from(usersSync)
-      .orderBy(usersSync.id);
+      .select({ id: user.id })
+      .from(user)
+      .orderBy(user.id);
 
     if (users.length === 0) {
       console.log("👤 No users found, inserting default seed user...");
-      await db.insert(usersSync).values({
+      await db.insert(user).values({
         id: "seed-user-001",
         name: "Seed User",
         email: "seed@example.com",
+        emailVerified: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       users = [{ id: "seed-user-001" }];
     }
 
-    const ids = users.map((user) => user.id);
+    const ids = users.map((u) => u.id);
     console.log(`👥 Using ${users.length} user(s)`);
 
     console.log("🍩 Using drizzle-seed...");

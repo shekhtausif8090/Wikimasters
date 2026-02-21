@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import db from "@/db";
-import { articles, usersSync } from "@/db/schema";
+import { articles, user } from "@/db/schema";
 import resend from "@/email";
 import CelebrationTemplate from "@/email/templates/celebration-template";
 
@@ -14,13 +14,13 @@ export default async function sendCelebrationEmail(
 ) {
   const response = await db
     .select({
-      email: usersSync.email,
-      id: usersSync.id,
+      email: user.email,
+      id: user.id,
       title: articles.title,
-      name: usersSync.name,
+      name: user.name,
     })
     .from(articles)
-    .leftJoin(usersSync, eq(articles.authorId, usersSync.id))
+    .leftJoin(user, eq(articles.authorId, user.id))
     .where(eq(articles.id, articleId));
 
   const { email, id, title, name } = response[0];

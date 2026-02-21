@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import redis from "@/cache";
 import db from "@/db/index";
-import { articles, usersSync } from "@/db/schema";
+import { articles, user } from "@/db/schema";
 
 // The list view selects only a subset of Article fields and adds the author's
 // resolved name. Use a dedicated type for the list response.
@@ -29,10 +29,10 @@ export async function getArticles(): Promise<ArticleList[]> {
       createdAt: articles.createdAt,
       summary: articles.summary,
       content: articles.content,
-      author: usersSync.name,
+      author: user.name,
     })
     .from(articles)
-    .leftJoin(usersSync, eq(articles.authorId, usersSync.id));
+    .leftJoin(user, eq(articles.authorId, user.id));
 
   console.log("🏹 Get Articles Cache Miss!");
   // Store cache as JSON so we can retrieve a typed array later
@@ -62,12 +62,12 @@ export async function getArticleById(id: number) {
       id: articles.id,
       createdAt: articles.createdAt,
       content: articles.content,
-      author: usersSync.name,
+      author: user.name,
       imageUrl: articles.imageUrl,
     })
     .from(articles)
     .where(eq(articles.id, id))
-    .leftJoin(usersSync, eq(articles.authorId, usersSync.id));
+    .leftJoin(user, eq(articles.authorId, user.id));
   // Cast the DB response to the shape we selected above.
   return response[0] ? (response[0] as unknown as ArticleWithAuthor) : null;
 }

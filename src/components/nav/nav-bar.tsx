@@ -1,4 +1,3 @@
-import { UserButton } from "@stackframe/stack";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,10 +5,11 @@ import {
   NavigationMenuItem,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { stackServerApp } from "@/stack/server";
+import { UserButton } from "@/components/user-button";
+import { getUser } from "@/lib/auth-server";
 
 export default async function NavBar() {
-  const user = await stackServerApp.getUser();
+  const user = await getUser();
 
   return (
     <nav className="w-full border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
@@ -32,12 +32,12 @@ export default async function NavBar() {
               <>
                 <NavigationMenuItem>
                   <Button asChild variant="outline">
-                    <Link href="/handler/sign-in">Sign In</Link>
+                    <Link href="/auth/sign-in">Sign In</Link>
                   </Button>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <Button asChild>
-                    <Link href="/handler/sign-up">Sign Up</Link>
+                    <Link href="/auth/sign-up">Sign Up</Link>
                   </Button>
                 </NavigationMenuItem>
               </>

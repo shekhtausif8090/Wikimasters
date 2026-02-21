@@ -1,7 +1,7 @@
 "use server";
 
 import { put } from "@vercel/blob";
-import { stackServerApp } from "@/stack/server";
+import { getUser } from "@/lib/auth-server";
 
 // Server action to handle uploads (stub)
 
@@ -13,7 +13,7 @@ export type UploadedFile = {
 };
 
 export async function uploadFile(formData: FormData): Promise<UploadedFile> {
-  const user = stackServerApp.getUser();
+  const user = await getUser();
   if (!user) {
     throw new Error("❌ Unauthorized");
   }

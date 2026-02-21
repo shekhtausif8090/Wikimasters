@@ -1,4 +1,3 @@
-import type { CurrentUser } from "@stackframe/stack";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import summarizeArticle from "@/ai/summarize";
 import {
@@ -10,42 +9,42 @@ import redis from "@/cache";
 import * as authz from "@/db/authz";
 import db from "@/db/index";
 import { articles } from "@/db/schema";
-import { stackServerApp } from "@/stack/server";
+import * as authServer from "@/lib/auth-server";
 
 // Mock dependencies
 vi.mock("@/db/index");
-vi.mock("@/stack/server");
+vi.mock("@/lib/auth-server");
 vi.mock("@/db/authz");
 vi.mock("@/cache");
 vi.mock("@/ai/summarize");
 vi.mock("@/db/sync-user");
 
+// Better Auth user type
+type BetterAuthUser = {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 describe("Article Actions", () => {
-  const mockUser = {
+  const mockUser: BetterAuthUser = {
     id: "user-123",
-    // minimal fields from Stack's CurrentUser / BaseUser shape used in tests
-    displayName: null,
-    primaryEmail: "test@example.com",
-    primaryEmailVerified: true,
-    profileImageUrl: null,
-    signedUpAt: new Date(),
-    clientMetadata: {},
-    clientReadOnlyMetadata: {},
-    hasPassword: false,
-    emailAuthEnabled: false,
-    otpAuthEnabled: false,
-    passkeyAuthEnabled: false,
-    isMultiFactorRequired: false,
-    isAnonymous: false,
-    oauthProviders: [],
-    // helper used by the stack runtime; provide a simple stub
-    toClientJson: () => ({}) as unknown,
-  } as unknown as CurrentUser;
+    name: "Test User",
+    email: "test@example.com",
+    emailVerified: true,
+    image: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
     // Setup default mocks
-    vi.mocked(stackServerApp.getUser).mockResolvedValue(mockUser);
+    vi.mocked(authServer.getUser).mockResolvedValue(mockUser);
     vi.mocked(summarizeArticle).mockResolvedValue("Test summary");
     vi.mocked(redis.del).mockResolvedValue(1);
   });
@@ -77,7 +76,7 @@ describe("Article Actions", () => {
     });
 
     it("should throw error when user is not authenticated", async () => {
-      vi.mocked(stackServerApp.getUser).mockResolvedValue(null);
+      vi.mocked(authServer.getUser).mockResolvedValue(null);
 
       const articleData = {
         title: "Test Article",
@@ -150,7 +149,7 @@ describe("Article Actions", () => {
     });
 
     it("should throw error when user is not authenticated", async () => {
-      vi.mocked(stackServerApp.getUser).mockResolvedValue(null);
+      vi.mocked(authServer.getUser).mockResolvedValue(null);
 
       await expect(updateArticle("1", { title: "New Title" })).rejects.toThrow(
         "Unauthorized",
@@ -195,7 +194,7 @@ describe("Article Actions", () => {
     });
 
     it("should throw error when user is not authenticated", async () => {
-      vi.mocked(stackServerApp.getUser).mockResolvedValue(null);
+      vi.mocked(authServer.getUser).mockResolvedValue(null);
 
       await expect(deleteArticle("1")).rejects.toThrow("Unauthorized");
       expect(db.delete).not.toHaveBeenCalled();

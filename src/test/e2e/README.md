@@ -19,7 +19,7 @@ The E2E test suite covers:
 Tests use Playwright's [authentication storage state](https://playwright.dev/docs/auth) pattern:
 
 1. **Setup Project** (`auth.setup.ts`): Runs once before all tests
-   - Logs in using Stack authentication
+   - Logs in using Better Auth email/password authentication
    - Saves authenticated state to `playwright/.auth/user.json`
 
 2. **Test Projects**:
@@ -66,15 +66,14 @@ NEON_PROJECT_ID=your-neon-project-id
 
 Get this from: https://console.neon.tech/
 
-**Stack Authentication:**
+**Better Auth Configuration:**
 
 ```bash
-NEXT_PUBLIC_STACK_PROJECT_ID=your-stack-project-id
-NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=your-stack-publishable-key
-STACK_SECRET_SERVER_KEY=your-stack-secret-key
+BETTER_AUTH_SECRET=your-secret-key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Get these from: https://app.stack-auth.com/
+Generate a secret with: `openssl rand -base64 32`
 
 **Test User Credentials:**
 
@@ -83,7 +82,7 @@ TEST_USER_EMAIL=test@example.com
 TEST_USER_PASSWORD=your-test-password
 ```
 
-Create a test user in your Stack project first, then add the credentials here.
+Create a test user in your database first, then add the credentials here.
 
 **Other Required Services:**
 
@@ -93,10 +92,10 @@ UPSTASH_REDIS_REST_TOKEN=your-redis-token
 ANTHROPIC_API_KEY=your-anthropic-api-key
 ```
 
-### 3. Create a Test User in Stack
+### 3. Create a Test User
 
-1. Go to your Stack project dashboard
-2. Navigate to Users section
+1. Start your development server
+2. Navigate to /auth/sign-up
 3. Create a new user with the email/password you specified in `.env.test.local`
 4. Verify the user is active
 
