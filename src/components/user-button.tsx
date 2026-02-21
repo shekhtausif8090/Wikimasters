@@ -13,9 +13,7 @@ export function UserButton() {
   const [isOpen, setIsOpen] = useState(false);
 
   if (isPending) {
-    return (
-      <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
-    );
+    return <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />;
   }
 
   if (!session?.user) {

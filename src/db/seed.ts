@@ -15,10 +15,7 @@ async function main() {
     await sql.query("TRUNCATE TABLE articles RESTART IDENTITY CASCADE;");
 
     console.log("🔎 Querying existing users...");
-    let users = await db
-      .select({ id: user.id })
-      .from(user)
-      .orderBy(user.id);
+    let users = await db.select({ id: user.id }).from(user).orderBy(user.id);
 
     if (users.length === 0) {
       console.log("👤 No users found, inserting default seed user...");

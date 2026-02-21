@@ -20,9 +20,7 @@ setup("authenticate", async ({ page }) => {
 
   if (!testEmail || !testPassword) {
     console.warn("⚠️  TEST_USER_EMAIL and TEST_USER_PASSWORD not set.");
-    console.warn(
-      "⚠️  Please create a test user and set these credentials.",
-    );
+    console.warn("⚠️  Please create a test user and set these credentials.");
     console.warn("⚠️  Skipping authentication setup...");
     return;
   }
