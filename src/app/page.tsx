@@ -5,7 +5,14 @@ import { WikiCard } from "@/components/ui/wiki-card";
 import { getArticles } from "@/lib/data/articles";
 
 export default async function Home() {
-  const articles = await getArticles();
+  let articles = [];
+  try {
+    articles = await getArticles();
+  } catch (error) {
+    console.log("exception occured");
+    console.log(error);
+  }
+
   return (
     <div>
       <main className="max-w-2xl mx-auto mt-10 flex flex-col gap-6">
