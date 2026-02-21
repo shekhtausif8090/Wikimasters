@@ -22,8 +22,8 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ci": "playwright test --reporter=list",
-    "test:ci": "npm run test && npm run test:e2e:ci",
-    "test:all": "npm run test:ci"
+    "test:ci": "bun run test && bun run test:e2e:ci",
+    "test:all": "bun run test:ci"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
