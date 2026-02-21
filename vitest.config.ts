@@ -7,14 +7,14 @@ export default defineConfig({
   test: {
     environment: "happy-dom",
     globals: true,
-    setupFiles: ["./test/setup.ts"],
+    setupFiles: ["./src/test/setup.ts"],
     include: ["**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
-    exclude: ["node_modules", "dist", ".next", "test/e2e"],
+    exclude: ["node_modules", "dist", ".next", "src/test/e2e"],
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "server-only": path.resolve(__dirname, "./test/mocks/server-only.ts"),
+      "server-only": path.resolve(__dirname, "./src/test/mocks/server-only.ts"),
     },
   },
 });

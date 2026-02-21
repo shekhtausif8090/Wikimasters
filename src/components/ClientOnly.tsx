@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type React from "react";
 import useHasMounted from "@/hooks/use-has-hydrated";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {

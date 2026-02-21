@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { Plus } from "lucide-react";
-import { WikiCard } from "@/components/ui/wiki-card";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { WikiCard } from "@/components/ui/wiki-card";
 import { getArticles } from "@/lib/data/articles";
 
 export default async function Home() {
