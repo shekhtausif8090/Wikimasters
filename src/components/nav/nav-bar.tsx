@@ -9,7 +9,13 @@ import {
 import { stackServerApp } from "@/stack/server";
 
 export default async function NavBar() {
-  const user = await stackServerApp.getUser();
+  let user = null;
+  try {
+    user = await stackServerApp.getUser();
+  } catch (error) {
+    console.error("Failed to get user:", error);
+    // Continue with user as null - will show sign in/up buttons
+  }
 
   return (
     <nav className="w-full border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
