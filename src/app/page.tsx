@@ -5,13 +5,7 @@ import { WikiCard } from "@/components/ui/wiki-card";
 import { getArticles } from "@/lib/data/articles";
 
 export default async function Home() {
-  let articles: any[] = [];
-  try {
-    articles = await getArticles();
-  } catch (error) {
-    console.log("exception occured");
-    console.log(error);
-  }
+  const articles = await getArticles();
 
   return (
     <div>
