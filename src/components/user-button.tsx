@@ -13,7 +13,7 @@ export function UserButton() {
   const [isOpen, setIsOpen] = useState(false);
 
   if (isPending) {
-    return <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />;
+    return <div className="w-9 h-9 rounded-full bg-muted animate-pulse" />;
   }
 
   if (!session?.user) {
@@ -31,10 +31,10 @@ export function UserButton() {
       <Button
         variant="ghost"
         size="sm"
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 hover:bg-primary/5"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
+        <div className="w-8 h-8 rounded-full bg-linear-to-br from-primary to-primary/70 flex items-center justify-center overflow-hidden shadow-sm">
           {session.user.image ? (
             <Image
               src={session.user.image}
@@ -44,7 +44,7 @@ export function UserButton() {
               className="w-8 h-8 rounded-full"
             />
           ) : (
-            <User className="w-4 h-4" />
+            <User className="w-4 h-4 text-primary-foreground" />
           )}
         </div>
         <span className="hidden sm:inline">{session.user.name}</span>
@@ -58,21 +58,25 @@ export function UserButton() {
             onClick={() => setIsOpen(false)}
             aria-label="Close menu"
           />
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-20">
-            <div className="px-4 py-3 border-b">
-              <p className="text-sm font-medium">{session.user.name}</p>
-              <p className="text-xs text-gray-500 truncate">
+          <div className="absolute right-0 mt-2 w-56 bg-card rounded-xl shadow-xl border-2 z-20 overflow-hidden">
+            <div className="px-4 py-3 border-b bg-muted/30">
+              <p className="text-sm font-medium text-foreground">
+                {session.user.name}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
                 {session.user.email}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </button>
+            <div className="p-1">
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            </div>
           </div>
         </>
       )}

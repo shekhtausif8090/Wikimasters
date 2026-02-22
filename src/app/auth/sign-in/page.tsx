@@ -1,5 +1,6 @@
 "use client";
 
+import { BookOpen, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -42,18 +43,28 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <h1 className="text-2xl font-bold text-center">Sign In</h1>
-          <p className="text-center text-gray-600">
-            Welcome back to Wikimasters
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-background to-accent/10" />
+      <div className="absolute top-20 -left-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 -right-20 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+
+      <Card className="w-full max-w-md relative border-2 shadow-xl shadow-primary/5">
+        <CardHeader className="text-center pb-2">
+          <div className="flex justify-center mb-4">
+            <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-linear-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/25">
+              <BookOpen className="w-7 h-7" />
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">Welcome Back</h1>
+          <p className="text-muted-foreground">
+            Sign in to continue to Wikimasters
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
+              <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
                 {error}
               </div>
             )}
@@ -66,6 +77,7 @@ export default function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
+                className="h-11"
                 required
               />
             </div>
@@ -78,19 +90,34 @@ export default function SignInPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                className="h-11"
                 required
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+            <Button
+              type="submit"
+              className="w-full h-11 shadow-md shadow-primary/20"
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  Signing in...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </span>
+              )}
             </Button>
 
-            <p className="text-center text-sm text-gray-600">
+            <p className="text-center text-sm text-muted-foreground pt-2">
               Don&apos;t have an account?{" "}
               <Link
                 href="/auth/sign-up"
-                className="text-blue-600 hover:underline"
+                className="text-primary font-medium hover:underline"
               >
                 Sign Up
               </Link>

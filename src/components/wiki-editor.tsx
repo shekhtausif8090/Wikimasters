@@ -7,6 +7,7 @@ import type React from "react";
 import { useState } from "react";
 import { createArticle, updateArticle } from "@/app/actions/articles";
 import { uploadFile } from "@/app/actions/upload";
+import ClientOnly from "@/components/ClientOnly";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -124,26 +125,34 @@ export default function WikiEditor({
   const pageTitle = isEditing ? "Edit Article" : "Create New Article";
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+    <div className="min-h-screen">
+      {/* Header section with gradient */}
+      <div className="relative bg-linear-to-br from-primary/10 via-background to-accent/10 border-b">
+        <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+        <div className="relative max-w-5xl mx-auto px-4 py-10">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
             {pageTitle}
           </h1>
           {isEditing && articleId && (
             <p className="text-muted-foreground mt-3 text-sm">
               Editing article ID:{" "}
-              <span className="font-mono font-medium">{articleId}</span>
+              <span className="font-mono font-medium bg-muted px-2 py-0.5 rounded">
+                {articleId}
+              </span>
             </p>
           )}
         </div>
+      </div>
 
+      <div className="max-w-5xl mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="space-y-8 pb-32">
           {/* Title Section */}
-          <Card className="border-2 shadow-sm">
+          <Card className="border-2 shadow-lg shadow-primary/5">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg">Article Title</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                Article Title
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -169,9 +178,12 @@ export default function WikiEditor({
           </Card>
 
           {/* Content Section */}
-          <Card className="border-2 shadow-sm">
+          <Card className="border-2 shadow-lg shadow-primary/5">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg">Article Content</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                Article Content
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -183,23 +195,26 @@ export default function WikiEditor({
                     errors.content ? "border-destructive" : "border-border"
                   }`}
                 >
-                  <MDEditor
-                    value={content}
-                    onChange={(val) => setContent(val || "")}
-                    preview="edit"
-                    hideToolbar={false}
-                    visibleDragbar={false}
-                    height={500}
-                    textareaProps={{
-                      placeholder: "Write your article content in Markdown...",
-                      style: { fontSize: 16, lineHeight: 1.5 },
-                      // make these explicit so SSR and client output match exactly
-                      autoCapitalize: "off",
-                      autoComplete: "off",
-                      autoCorrect: "off",
-                      spellCheck: false,
-                    }}
-                  />
+                  <ClientOnly>
+                    <MDEditor
+                      value={content}
+                      onChange={(val) => setContent(val || "")}
+                      preview="edit"
+                      hideToolbar={false}
+                      visibleDragbar={false}
+                      height={500}
+                      textareaProps={{
+                        placeholder:
+                          "Write your article content in Markdown...",
+                        style: { fontSize: 16, lineHeight: 1.5 },
+                        // make these explicit so SSR and client output match exactly
+                        autoCapitalize: "off",
+                        autoComplete: "off",
+                        autoCorrect: "off",
+                        spellCheck: false,
+                      }}
+                    />
+                  </ClientOnly>
                 </div>
                 {errors.content && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">
@@ -212,13 +227,16 @@ export default function WikiEditor({
           </Card>
 
           {/* File Upload Section */}
-          <Card className="border-2 shadow-sm">
+          <Card className="border-2 shadow-lg shadow-primary/5">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg">Attachments</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-primary" />
+                Attachments
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-5">
-                <div className="relative border-2 border-dashed border-muted-foreground/30 hover:border-muted-foreground/50 rounded-xl p-10 text-center bg-muted/20 hover:bg-muted/30 cursor-pointer group">
+                <div className="relative border-2 border-dashed border-primary/30 hover:border-primary/50 rounded-xl p-10 text-center bg-primary/5 hover:bg-primary/10 cursor-pointer group transition-all duration-300">
                   <Input
                     id="file-upload"
                     type="file"
@@ -297,8 +315,8 @@ export default function WikiEditor({
         </form>
 
         {/* Sticky Action Buttons */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border shadow-2xl z-50">
-          <div className="container mx-auto px-4 py-4 max-w-5xl">
+        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border shadow-2xl z-50">
+          <div className="max-w-5xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between gap-4">
               <p className="text-sm text-muted-foreground hidden sm:block">
                 {isEditing
@@ -319,9 +337,16 @@ export default function WikiEditor({
                   type="submit"
                   disabled={isSubmitting}
                   onClick={handleSubmit}
-                  className="min-w-[120px] shadow-lg"
+                  className="min-w-[140px] shadow-lg shadow-primary/20"
                 >
-                  {isSubmitting ? "Saving..." : "Save Article"}
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                      Saving...
+                    </span>
+                  ) : (
+                    "Save Article"
+                  )}
                 </Button>
               </div>
             </div>
