@@ -27,10 +27,13 @@ export default async function EditArticlePage({
   if (!article) {
     notFound();
   }
+  console.log(article);
+
   return (
     <WikiEditor
       initialTitle={article.title}
       initialContent={article.content}
+      initialImage={article.imageUrl || ""}
       isEditing={true}
       articleId={id}
     />

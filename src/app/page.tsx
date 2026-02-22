@@ -87,7 +87,7 @@ export default async function Home() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6">
             {articles.map(({ title, id, createdAt, summary, author }) => (
               <WikiCard
                 title={title}

@@ -12,10 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 interface WikiEditorProps {
   initialTitle?: string;
   initialContent?: string;
+  initialImage?: File | string;
   isEditing?: boolean;
   articleId?: string;
 }
@@ -28,13 +30,16 @@ interface FormErrors {
 export default function WikiEditor({
   initialTitle = "",
   initialContent = "",
+  initialImage = "",
   isEditing = false,
   articleId,
 }: WikiEditorProps) {
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
-  const [image, setImage] = useState<File | null>(null);
+  const [image, setImage] = useState<File | string | null>(
+    initialImage || null,
+  );
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -64,7 +69,7 @@ export default function WikiEditor({
 
   // Remove image
   const removeImage = () => {
-    setImage(null);
+    setImage("");
   };
 
   // Handle form submission using Server Actions
@@ -79,10 +84,16 @@ export default function WikiEditor({
 
       // If there's an image, upload it via server action
       if (image) {
-        const fd = new FormData();
-        fd.append("files", image);
-        const uploaded = await uploadFile(fd);
-        imageUrl = uploaded?.url;
+        if (typeof image === "string") {
+          // Existing image URL, use as-is
+          imageUrl = image;
+        } else {
+          // New file upload
+          const fd = new FormData();
+          fd.append("files", image);
+          const uploaded = await uploadFile(fd);
+          imageUrl = uploaded?.url;
+        }
       }
 
       const payload = {
@@ -257,16 +268,18 @@ export default function WikiEditor({
                 ) : (
                   <div className="flex items-center justify-between p-3 bg-muted/50 hover:bg-muted border border-border rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="shrink-0 w-10 h-10 rounded-md bg-background border border-border flex items-center justify-center">
-                        <ImageIcon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-foreground">
-                          {image.name}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {(image.size / 1024).toFixed(1)} KB
-                        </span>
+                      <div className="shrink-0 rounded-md overflow-hidden border border-border">
+                        <Image
+                          src={
+                            typeof image === "string"
+                              ? image
+                              : URL.createObjectURL(image)
+                          }
+                          width={200}
+                          height={200}
+                          alt="Cover image preview"
+                          className="object-cover"
+                        />
                       </div>
                     </div>
                     <Button
