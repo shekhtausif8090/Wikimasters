@@ -195,26 +195,23 @@ export default function WikiEditor({
                     errors.content ? "border-destructive" : "border-border"
                   }`}
                 >
-                  <ClientOnly>
-                    <MDEditor
-                      value={content}
-                      onChange={(val) => setContent(val || "")}
-                      preview="edit"
-                      hideToolbar={false}
-                      visibleDragbar={false}
-                      height={500}
-                      textareaProps={{
-                        placeholder:
-                          "Write your article content in Markdown...",
-                        style: { fontSize: 16, lineHeight: 1.5 },
-                        // make these explicit so SSR and client output match exactly
-                        autoCapitalize: "off",
-                        autoComplete: "off",
-                        autoCorrect: "off",
-                        spellCheck: false,
-                      }}
-                    />
-                  </ClientOnly>
+                  <MDEditor
+                    value={content}
+                    onChange={(val) => setContent(val || "")}
+                    preview="edit"
+                    hideToolbar={false}
+                    visibleDragbar={false}
+                    height={500}
+                    textareaProps={{
+                      placeholder: "Write your article content in Markdown...",
+                      style: { fontSize: 16, lineHeight: 1.5 },
+                      // make these explicit so SSR and client output match exactly
+                      autoCapitalize: "off",
+                      autoComplete: "off",
+                      autoCorrect: "off",
+                      spellCheck: false,
+                    }}
+                  />
                 </div>
                 {errors.content && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">

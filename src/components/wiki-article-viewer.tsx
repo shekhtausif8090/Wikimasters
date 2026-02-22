@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ArrowLeft,
   Calendar,
@@ -12,14 +10,15 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
 import { deleteArticleForm } from "@/app/actions/articles";
-import { incrementPageview } from "@/app/actions/pageviews";
 import ClientOnly from "@/components/ClientOnly";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import MarkDown from "./MarkDown";
+import ArticleViews from "./ArticleViews";
+import FormatDate from "./FormatDate";
+import { Suspense } from "react";
 
 interface ViewerArticle {
   title: string;
@@ -40,27 +39,6 @@ export default function WikiArticleViewer({
   article,
   canEdit = false,
 }: WikiArticleViewerProps) {
-  // local state to show updated pageviews after increment
-  const [localPageviews, setLocalPageviews] = useState<number | null>(null);
-
-  useEffect(() => {
-    async function fetchPageview() {
-      const newCount = await incrementPageview(article.id);
-      setLocalPageviews(newCount ?? null);
-    }
-    fetchPageview();
-  }, [article.id]);
-
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
   return (
     <div className="min-h-screen">
       {/* Hero header for the article */}
@@ -98,20 +76,13 @@ export default function WikiArticleViewer({
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground bg-background/50 backdrop-blur-sm px-3 py-1.5 rounded-full">
                   <Calendar className="h-4 w-4" />
-                  <ClientOnly>
-                    <span>{formatDate(article.createdAt)}</span>
-                  </ClientOnly>
+                  <FormatDate date={article.createdAt} />
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="font-medium">
                     Article
                   </Badge>
-                  <div className="flex items-center gap-1.5 text-muted-foreground bg-background/50 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                    <Eye className="h-4 w-4" />
-                    <ClientOnly>
-                      <span>{localPageviews ? localPageviews : "—"} views</span>
-                    </ClientOnly>
-                  </div>
+                  <ArticleViews articleId={article.id} />
                 </div>
               </div>
             </div>
@@ -148,7 +119,6 @@ export default function WikiArticleViewer({
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Card className="border-2 shadow-lg shadow-primary/5">
           <CardContent className="pt-6 pb-8">
-            {/* Article Image - Display if exists */}
             {article.imageUrl && (
               <div className="mb-8">
                 <div className="relative w-full h-64 md:h-96 rounded-xl overflow-hidden shadow-lg">
@@ -164,99 +134,8 @@ export default function WikiArticleViewer({
             )}
 
             {/* Rendered Markdown Content */}
-            <div className="prose prose-stone dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground/90 prose-strong:text-foreground prose-a:text-primary">
-              <ReactMarkdown
-                components={{
-                  // Customize heading styles
-                  h1: ({ children }) => (
-                    <h1 className="text-3xl font-bold mt-8 mb-4 text-foreground">
-                      {children}
-                    </h1>
-                  ),
-                  h2: ({ children }) => (
-                    <h2 className="text-2xl font-semibold mt-6 mb-3 text-foreground">
-                      {children}
-                    </h2>
-                  ),
-                  h3: ({ children }) => (
-                    <h3 className="text-xl font-semibold mt-4 mb-2 text-foreground">
-                      {children}
-                    </h3>
-                  ),
-                  // Customize paragraph styles
-                  p: ({ children }) => (
-                    <p className="mb-4 text-foreground leading-7">{children}</p>
-                  ),
-                  // Customize list styles
-                  ul: ({ children }) => (
-                    <ul className="mb-4 ml-6 list-disc text-foreground">
-                      {children}
-                    </ul>
-                  ),
-                  ol: ({ children }) => (
-                    <ol className="mb-4 ml-6 list-decimal text-foreground">
-                      {children}
-                    </ol>
-                  ),
-                  li: ({ children }) => (
-                    <li className="mb-1 text-foreground">{children}</li>
-                  ),
-                  // Customize code styles
-                  code: ({ children, className }) => {
-                    const isInline = !className;
-                    return isInline ? (
-                      <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground">
-                        {children}
-                      </code>
-                    ) : (
-                      <code className={className}>{children}</code>
-                    );
-                  },
-                  pre: ({ children }) => (
-                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto mb-4 text-sm">
-                      {children}
-                    </pre>
-                  ),
-                  // Customize blockquote styles
-                  blockquote: ({ children }) => (
-                    <blockquote className="border-l-4 border-muted-foreground pl-4 italic my-4 text-muted-foreground">
-                      {children}
-                    </blockquote>
-                  ),
-                  // Customize link styles
-                  a: ({ children, href }) => (
-                    <a
-                      href={href}
-                      className="text-primary hover:underline font-medium"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {children}
-                    </a>
-                  ),
-                  // Customize table styles
-                  table: ({ children }) => (
-                    <div className="overflow-x-auto mb-4">
-                      <table className="min-w-full border-collapse border border-border">
-                        {children}
-                      </table>
-                    </div>
-                  ),
-                  th: ({ children }) => (
-                    <th className="border border-border bg-muted px-4 py-2 text-left font-semibold">
-                      {children}
-                    </th>
-                  ),
-                  td: ({ children }) => (
-                    <td className="border border-border px-4 py-2">
-                      {children}
-                    </td>
-                  ),
-                }}
-              >
-                {article.content}
-              </ReactMarkdown>
-            </div>
+
+            <MarkDown content={article.content} />
           </CardContent>
         </Card>
 
