@@ -8,10 +8,11 @@ import {
 } from "@/components/ui/navigation-menu";
 import { UserButton } from "@/components/user-button";
 import { getUser } from "@/lib/auth-server";
+import NavActions from "./NavActions";
+import { Suspense } from "react";
+import Spinner from "../ui/spinner";
 
 export default async function NavBar() {
-  const user = await getUser();
-
   return (
     <nav className="w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto flex h-16 items-center justify-between px-4">
@@ -23,32 +24,9 @@ export default async function NavBar() {
             Wikimasters
           </span>
         </Link>
-        <NavigationMenu>
-          <NavigationMenuList className="flex items-center gap-2">
-            {user ? (
-              <NavigationMenuItem>
-                <UserButton />
-              </NavigationMenuItem>
-            ) : (
-              <>
-                <NavigationMenuItem>
-                  <Button
-                    asChild
-                    variant="ghost"
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <Link href="/auth/sign-in">Sign In</Link>
-                  </Button>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <Button asChild className="shadow-md shadow-primary/20">
-                    <Link href="/auth/sign-up">Get Started</Link>
-                  </Button>
-                </NavigationMenuItem>
-              </>
-            )}
-          </NavigationMenuList>
-        </NavigationMenu>
+        <Suspense fallback={<Spinner />}>
+          <NavActions />
+        </Suspense>
       </div>
     </nav>
   );

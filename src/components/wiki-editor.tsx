@@ -7,7 +7,7 @@ import type React from "react";
 import { useState } from "react";
 import { createArticle, updateArticle } from "@/app/actions/articles";
 import { uploadFile } from "@/app/actions/upload";
-import ClientOnly from "@/components/ClientOnly";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,7 @@ export default function WikiEditor({
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
-  const [files, setFiles] = useState<File[]>([]);
+  const [image, setImage] = useState<File | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,23 +56,20 @@ export default function WikiEditor({
 
   // Handle file upload
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = event.target.files;
-    if (selectedFiles) {
-      const newFiles = Array.from(selectedFiles);
-      setFiles((prev) => [...prev, ...newFiles]);
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      setImage(selectedFile);
     }
   };
 
-  // Remove file
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+  // Remove image
+  const removeImage = () => {
+    setImage(null);
   };
 
   // Handle form submission using Server Actions
   // We import server actions and call them from the client component.
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
@@ -80,11 +77,10 @@ export default function WikiEditor({
     try {
       let imageUrl: string | undefined;
 
-      // If there's at least one file, upload the first one via server action
-      if (files.length > 0) {
+      // If there's an image, upload it via server action
+      if (image) {
         const fd = new FormData();
-        fd.append("files", files[0]);
-        // uploadFile is a server action imported below
+        fd.append("files", image);
         const uploaded = await uploadFile(fd);
         imageUrl = uploaded?.url;
       }
@@ -145,7 +141,7 @@ export default function WikiEditor({
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <form onSubmit={handleSubmit} className="space-y-8 pb-32">
+        <div className="space-y-8 pb-32">
           {/* Title Section */}
           <Card className="border-2 shadow-lg shadow-primary/5">
             <CardHeader className="pb-4">
@@ -223,93 +219,71 @@ export default function WikiEditor({
             </CardContent>
           </Card>
 
-          {/* File Upload Section */}
+          {/* Image Upload Section */}
           <Card className="border-2 shadow-lg shadow-primary/5">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <ImageIcon className="w-5 h-5 text-primary" />
-                Attachments
+                Cover Image
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-5">
-                <div className="relative border-2 border-dashed border-primary/30 hover:border-primary/50 rounded-xl p-10 text-center bg-primary/5 hover:bg-primary/10 cursor-pointer group transition-all duration-300">
-                  <Input
-                    id="file-upload"
-                    type="file"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  <Upload className="mx-auto h-14 w-14 text-muted-foreground/40 group-hover:text-muted-foreground/60 mb-4" />
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="file-upload"
-                      className="cursor-pointer text-base font-semibold text-foreground/90"
-                    >
-                      Click to upload files
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Upload images, documents, or other files to attach to your
-                      article
-                    </p>
-                    <p className="text-xs text-muted-foreground/70">
-                      Supports multiple files
-                    </p>
-                  </div>
-                </div>
-
-                {/* Display uploaded files */}
-                {files.length > 0 && (
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-foreground/90">
-                      Uploaded Files ({files.length})
-                    </Label>
+                {!image ? (
+                  <div className="relative border-2 border-dashed border-primary/30 hover:border-primary/50 rounded-xl p-10 text-center bg-primary/5 hover:bg-primary/10 cursor-pointer group transition-all duration-300">
+                    <Input
+                      id="file-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <Upload className="mx-auto h-14 w-14 text-muted-foreground/40 group-hover:text-muted-foreground/60 mb-4" />
                     <div className="space-y-2">
-                      {files.map((file, index) => {
-                        const isImage = file.type.startsWith("image/");
-                        return (
-                          <div
-                            // biome-ignore lint/suspicious/noArrayIndexKey: the order won't change
-                            key={index}
-                            className="flex items-center justify-between p-3 bg-muted/50 hover:bg-muted border border-border rounded-lg group"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="shrink-0 w-10 h-10 rounded-md bg-background border border-border flex items-center justify-center">
-                                {isImage ? (
-                                  <ImageIcon className="h-5 w-5 text-primary" />
-                                ) : (
-                                  <FileText className="h-5 w-5 text-muted-foreground" />
-                                )}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="text-sm font-medium text-foreground">
-                                  {file.name}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {(file.size / 1024).toFixed(1)} KB
-                                </span>
-                              </div>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeFile(index)}
-                              className="h-9 w-9 p-0 hover:bg-destructive/10 hover:text-destructive"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        );
-                      })}
+                      <Label
+                        htmlFor="file-upload"
+                        className="cursor-pointer text-base font-semibold text-foreground/90"
+                      >
+                        Click to upload an image
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Add a cover image for your article
+                      </p>
+                      <p className="text-xs text-muted-foreground/70">
+                        PNG, JPG, GIF up to 10MB
+                      </p>
                     </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 bg-muted/50 hover:bg-muted border border-border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="shrink-0 w-10 h-10 rounded-md bg-background border border-border flex items-center justify-center">
+                        <ImageIcon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground">
+                          {image.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {(image.size / 1024).toFixed(1)} KB
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeImage}
+                      className="h-9 w-9 p-0 hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
-        </form>
+        </div>
 
         {/* Sticky Action Buttons */}
         <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border shadow-2xl z-50">
@@ -331,7 +305,7 @@ export default function WikiEditor({
                   Cancel
                 </Button>
                 <Button
-                  type="submit"
+                  type="button"
                   disabled={isSubmitting}
                   onClick={handleSubmit}
                   className="min-w-[140px] shadow-lg shadow-primary/20"
